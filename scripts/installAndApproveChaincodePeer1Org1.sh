@@ -26,9 +26,14 @@ PACKAGE_ID=$(sed -n "/\"$CHAINCODE_NAME\"_\"$SEQUENCE\"/{s/^Package ID: //; s/, 
 
 peer lifecycle chaincode approveformyorg -o "$ORDERER_ADDRESS" \
     --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" --version "$VERSION" \
+    --peerAddresses peer1.org1.workspace.com:7051 \
     --init-required --package-id "$PACKAGE_ID" --sequence "$SEQUENCE"
 
 peer lifecycle chaincode checkcommitreadiness \
     --channelID "$CHANNEL_NAME" \
     -n "$CHAINCODE_NAME" \
-    -v "$VERSION" --sequence "$SEQUENCE" --init-required 
+    -v "$VERSION" --sequence "$SEQUENCE" --init-required
+
+# peer lifecycle chaincode commit -o ${ORDERER_ADDRESS} \
+#     --channelID ${CHANNEL_NAME} --name ${CHAINCODE_NAME} \
+#     --sequence ${VERSION} --version ${VERSION} --init-required

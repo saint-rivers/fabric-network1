@@ -62,8 +62,15 @@ peer lifecycle chaincode package ./chaincode/assetTransfer.tar.gz --lang golang 
 
 
 ########################################################################
-#       INSTALLING CHAINCODE
+#       INSTALLING AND APPROVING CHAINCODE
 ########################################################################
 
 docker exec -it cli bash -c ". scripts/installAndApproveChaincodePeer1Org1.sh"
 docker exec -it cli bash -c ". scripts/installAndApproveChaincodePeer1Org2.sh"
+
+
+########################################################################
+#       COMMITING CHAINCODE
+########################################################################
+
+docker exec -it cli bash -c ". scripts/commitChaincode.sh"
