@@ -1,0 +1,161 @@
+====================== step 1 ======================
+
+OrdererOrgs:
+  - Name: OrdererOrg
+    Domain: workspace.com
+    EnableNodeOUs: true
+    Template: 
+      Start: 1
+      Count: 3
+
+PeerOrgs:
+  - Name: Org1
+    Domain: org1.workspace.com
+    EnableNodeOUs: true
+    Template: 
+      Start: 1
+      Count: 3
+  - Name: Org2
+    Domain: org2.workspace.com
+    EnableNodeOUs: true
+    Template: 
+      Start: 1
+      Count: 3
+
+
+====================== step 2 ======================
+export FABRIC_CFG_PATH=$PWD/config
+export PATH=$PATH:$PWD/bin
+
+cryptogen generate --config=./config/crypto-config.yaml
+
+      
+====================== step 3 ======================
+Organizations:
+  - &OrdererOrg
+    Name: OrdererOrg
+    ID: OrdererMSP
+    MSPDir: #orderer msp directory
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererMSP.admin')"
+
+  - &Org1
+    Name: Org1MSP
+    ID: Org1MSP
+    MSPDir: #organization msp directory
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Org1MSP.admin', 'Org1MSP.peer', 'Org1MSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Org1MSP.admin', 'Org1MSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Org1MSP.admin')"
+    AnchorPeers:
+      - Host: #address
+        Port: 7051
+
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  OrdererType: solo
+  Addresses:  
+    - workspace.com:7050
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+  TwoOrgsChannel:
+    Consortium: SampleConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *Org1
+        - *Org2
+      Capabilities:
+        <<: *ApplicationCapabilities
+
+  TwoOrgsGenesis: 
+    Capabilities:
+      <<: *ChannelCapabilities
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+      Capabilities: 
+        <<: *OrdererCapabilities
+    Consortiums:
+      SampleConsortium:
+        Organizations:
+          - *Org1
+          - *Org2 
+
+
+====================== step 4 ======================
+
+configtxgen -profile TwoOrgsGenesis -channelID system-channel -outputBlock ./channel-artifacts/genesis.block
+configtxgen -profile TwoOrgsChannel -channelID workspace -outputCreateChannelTx ./channel-artifacts/workspace.tx
+configtxgen -profile TwoOrgsChannel -channelID workspace -outputAnchorPeersUpdate ./channel-artifacts/Org1MSPanchor.tx -asOrg Org1MSP
+configtxgen -profile TwoOrgsChannel -channelID workspace -outputAnchorPeersUpdate ./channel-artifacts/Org2MSPanchor.tx -asOrg Org2MSP

@@ -21,10 +21,12 @@ else
     echo FAIL
 fi
 
-rm -rf chaincode
-if [ $? -eq 0 ]; then
-    echo "================== Removing chaincode =================="
-    echo OK
-else
-    echo FAIL
-fi
+# rm -rf chaincode
+# if [ $? -eq 0 ]; then
+#     echo "================== Removing chaincode =================="
+#     echo OK
+# else
+#     echo FAIL
+# fi
+
+# sudo rm -rf docker/crypto-config
