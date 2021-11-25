@@ -1,0 +1,155 @@
+version: '2'
+
+volumes:
+  orderer.workspace:
+  peer1.org1.workspace:
+  peer2.org1.workspace:
+  peer1.org2.workspace:
+  peer2.org2.workspace:
+
+networks:
+  byfn:
+
+services: 
+  orderer.workspace.com:
+    extends:
+      file: docker-compose-base.yaml
+      service: orderer-base
+    container_name: orderer.workspace.com
+    networks:
+    - byfn
+    volumes:
+        - ../channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+        - ../crypto-config/ordererOrganizations/workspace.com/orderers/orderer.workspace.com/msp:/var/hyperledger/orderer/msp
+        - orderer.workspace:/var/hyperledger/production/orderer/orderer
+    ports:
+    - 7050:7050
+
+  peer1.org1.workspace.com:
+    container_name: peer1.org1.workspace.com
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.org1.workspace.com
+      - CORE_PEER_ADDRESS=peer1.org1.workspace.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer1.org1.workspace.com:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org1.workspace.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org1.workspace.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/orderer/msp
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org1.workspace.com/peers/peer1.org1.workspace.com/msp:/var/hyperledger/orderer/msp
+        - peer1.org1.workspace:/var/hyperledger/production/orderer/
+    ports:
+      - 7051:7051
+    networks:
+      - byfn
+
+  peer2.org1.workspace.com:
+    container_name: peer2.org1.workspace.com
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer2.org1.workspace.com
+      - CORE_PEER_ADDRESS=peer2.org1.workspace.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer2.org1.workspace.com:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.peer2.org1.workspace.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer2.org1.workspace.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/orderer/msp
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org1.workspace.com/peers/peer2.org1.workspace.com/msp:/var/hyperledger/orderer/msp
+        - peer1.org1.workspace:/var/hyperledger/production/orderer
+    ports:
+      - 8051:7051
+    networks:
+      - byfn
+
+  peer1.org2.workspace.com:
+    container_name: peer1.org2.workspace.com
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer1.org2.workspace.com
+      - CORE_PEER_ADDRESS=peer1.org2.workspace.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer1.org2.workspace.com:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org2.workspace.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org2.workspace.com:7051
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/orderer/msp
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org2.workspace.com/peers/peer1.org2.workspace.com/msp:/var/hyperledger/orderer/msp
+
+        - peer1.org2.workspace:/var/hyperledger/production/orderer
+    ports:
+      - 9051:7051
+    networks:
+      - byfn
+
+  peer2.org2.workspace.com:
+    container_name: peer2.org2.workspace.com
+    extends:
+      file: docker-compose-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer2.org2.workspace.com
+      - CORE_PEER_ADDRESS=peer2.org2.workspace.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer2.org2.workspace.com:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer2.peer2.org2.workspace.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer2.org2.workspace.com:7051
+      - CORE_PEER_LOCALMSPID=Org2MSP
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/orderer/msp
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/peerOrganizations/org2.workspace.com/peers/peer2.org2.workspace.com/msp:/var/hyperledger/orderer/msp
+
+        - peer2.org2.workspace:/var/hyperledger/production/orderer
+    ports:
+      - 10051:7051
+    networks:
+      - byfn
+
+  cli:
+    container_name: cli
+    image: hyperledger/fabric-tools:$IMAGE_TAG
+    tty: true
+    stdin_open: true
+    environment:
+      - SYS_CHANNEL=$SYS_CHANNEL
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer1.org1.workspace:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.workspace.com/users/Admin@org1.workspace.com/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+      - /var/run/:/host/var/run/
+      - ../chaincode/:/opt/gopath/src/github.com/chaincode
+      - ../crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+      - ../scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+      - ../channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+    depends_on:
+      - orderer.workspace.com
+      - peer1.org1.workspace.com
+      - peer2.org1.workspace.com
+      - peer1.org2.workspace.com
+      - peer2.org2.workspace.com
+    networks:
+      - byfn
