@@ -38,7 +38,7 @@ docker ps
 #       CREATE AND JOIN CHANNEL
 ########################################################################
 
-docker exec -it cli bash -c ". scripts/createChannel.sh"
+docker exec -it cli bash -c ". scripts/createChannel.sh workspace"
 
 docker exec -it cli bash -c ". scripts/joinChannelPeer1Org1.sh"
 docker exec -it cli bash -c ". scripts/joinChannelPeer1Org2.sh"
@@ -74,3 +74,11 @@ docker exec -it cli bash -c ". scripts/installAndApproveChaincodePeer1Org2.sh"
 ########################################################################
 
 docker exec -it cli bash -c ". scripts/commitChaincode.sh"
+
+
+
+########################################################################
+#       CREATE NEW CHANNEL
+########################################################################
+
+docker exec -it cli bash -c ". scripts/createNewChannel.sh retailing"
