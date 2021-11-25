@@ -4,9 +4,8 @@ OrdererOrgs:
   - Name: OrdererOrg
     Domain: workspace.com
     EnableNodeOUs: true
-    Template: 
-      Start: 1
-      Count: 3
+    Specs: 
+      - Hostname: orderer
 
 PeerOrgs:
   - Name: Org1
@@ -14,13 +13,13 @@ PeerOrgs:
     EnableNodeOUs: true
     Template: 
       Start: 1
-      Count: 3
+      Count: 2
   - Name: Org2
     Domain: org2.workspace.com
     EnableNodeOUs: true
     Template: 
       Start: 1
-      Count: 3
+      Count: 2
 
 
 ====================== step 2 ======================
