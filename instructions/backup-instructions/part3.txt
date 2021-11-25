@@ -1,0 +1,92 @@
+====================== step 8: package chaincode ====================== 
+
+pushd ./chaincode || exit 1
+go mod init assetTransfer.go
+go mod tidy
+GO111MODULE=on go mod vendor
+popd || exit 1
+
+export FABRIC_CFG_PATH=$PWD/config
+
+peer lifecycle chaincode package ./chaincode/assetTransfer.tar.gz --lang golang --label "sacc_1" --path ./chaincode
+
+
+====================== step 9: environment variables for installing chaincode ======================
+
+# installchaincode script
+
+export CHAINCODE_PATH=/opt/gopath/src/github.com/chaincode
+export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.workspace.com/users/Admin@org1.workspace.com/msp
+
+export CORE_PEER_ADDRESS="peer1.org1.workspace.com:7051"
+export ORDERER_ADDRESS="orderer.workspace.com:7050"
+
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CHANNEL_NAME=workspace
+
+
+====================== step 10: install chaincode ======================
+
+# installchaincode script
+
+peer lifecycle chaincode install "$CHAINCODE_PATH"/assetTransfer.tar.gz
+
+
+====================== step 11: approve chaincode chaincode ======================
+
+# installchaincode script
+
+CHAINCODE_NAME=sacc
+CHANNEL_NAME=workspace
+VERSION=1
+SEQUENCE=1
+
+peer lifecycle chaincode queryinstalled >&log.txt
+cat log.txt
+PACKAGE_ID=$(sed -n "/\"$CHAINCODE_NAME\"_\"$SEQUENCE\"/{s/^Package ID: //; s/, Label:.*$//;p;}" log.txt)
+
+peer lifecycle chaincode approveformyorg -o "$ORDERER_ADDRESS" \
+    --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" \
+    --version "$VERSION" --sequence "$SEQUENCE" \
+    --peerAddresses "$CORE_PEER_ADDRESS" \
+    --package-id "$PACKAGE_ID" \
+    --init-required 
+
+
+====================== step 11: approve chaincode chaincode ======================
+
+# installchaincode script
+
+peer lifecycle chaincode checkcommitreadiness \
+    --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" \
+    --version "$VERSION" --sequence "$SEQUENCE" \
+    --init-required
+
+
+====================== step 11: approve chaincode chaincode ======================
+
+# commit chaincode script
+
+export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.workspace.com/users/Admin@org1.workspace.com/msp
+export CORE_PEER_ADDRESS=peer1.org1.workspace.com:7051
+export CORE_PEER_LOCALMSPID="Org1MSP"
+
+export CHANNEL_NAME=workspace
+export ORDERER_ADDRESS="orderer.workspace.com:7050"
+
+CHAINCODE_NAME=sacc
+VERSION=1
+SEQUENCE=1
+
+peer lifecycle chaincode commit -o "$ORDERER_ADDRESS" \
+    --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" \
+    --version "$VERSION" --sequence "$SEQUENCE" \
+    --peerAddresses peer1.org1.workspace.com:7051 \
+    --peerAddresses peer1.org2.workspace.com:7051 \
+    --init-required
+
+peer lifecycle chaincode querycommitted \
+    --channelID "$CHANNEL_NAME" \
+    --name "$CHAINCODE_NAME"
+
+
