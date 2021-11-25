@@ -58,18 +58,6 @@ Organizations:
     ID: Org1MSP
     MSPDir: ../crypto-config/peerOrganizations/org1.workspace.com/users/Admin@org1.workspace.com/msp
     Policies:
-      # Readers:
-      #   Type: Signature
-      #   Rule: "OR('Org1MSP.admin', 'Org1MSP.peer', 'Org1MSP.client')"
-      # Writers:
-      #   Type: Signature
-      #   Rule: "OR('Org1MSP.admin', 'Org1MSP.client')"
-      # Admins:
-      #   Type: Signature
-      #   Rule: "OR('Org1MSP.admin')"
-      # Endorsement: 
-      #   Type: Signature
-      #   Rule: "OR('Org1MSP.member')"
       Readers:
         Type: Signature
         Rule: "OR('Org1MSP.member')"
@@ -92,18 +80,6 @@ Organizations:
     ID: Org2MSP
     MSPDir: ../crypto-config/peerOrganizations/org2.workspace.com/users/Admin@org2.workspace.com/msp
     Policies:
-      # Readers:
-      #   Type: Signature
-      #   Rule: "OR('Org2MSP.admin', 'Org2MSP.peer', 'Org2MSP.client')"
-      # Writers:
-      #   Type: Signature
-      #   Rule: "OR('Org2MSP.admin', 'Org2MSP.client')"
-      # Admins:
-      #   Type: Signature
-      #   Rule: "OR('Org2MSP.admin')"
-      # Endorsement: 
-      #   Type: Signature
-      #   Rule: "OR('Org1MSP.member')"
       Readers:
         Type: Signature
         Rule: "OR('Org2MSP.member')"
@@ -221,3 +197,4 @@ configtxgen -profile TwoOrgsGenesis -channelID system-channel -outputBlock ./cha
 configtxgen -profile TwoOrgsChannel -channelID workspace -outputCreateChannelTx ./channel-artifacts/workspace.tx
 configtxgen -profile TwoOrgsChannel -channelID workspace -outputAnchorPeersUpdate ./channel-artifacts/Org1MSPanchor.tx -asOrg Org1MSP
 configtxgen -profile TwoOrgsChannel -channelID workspace -outputAnchorPeersUpdate ./channel-artifacts/Org2MSPanchor.tx -asOrg Org2MSP
+
