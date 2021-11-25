@@ -2,7 +2,7 @@
 
 copy core.yaml
 
-copy orderer.yaml???
+copy orderer.yaml
 
 copy docker-compose-base.yaml
 
