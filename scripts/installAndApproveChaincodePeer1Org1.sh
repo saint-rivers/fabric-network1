@@ -1,15 +1,13 @@
 #!/bin/bash
 
 export CHAINCODE_PATH=/opt/gopath/src/github.com/chaincode
-
 export CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.workspace.com/users/Admin@org1.workspace.com/msp
-export CORE_PEER_ADDRESS=peer1.org1.workspace.com:7051
-export CORE_PEER_LOCALMSPID="Org1MSP"
 
-export UPDATE_ANCHOR_PEER="Org1MSPanchors"
-
-export CHANNEL_NAME=workspace
+export CORE_PEER_ADDRESS="peer1.org1.workspace.com:7051"
 export ORDERER_ADDRESS="orderer.workspace.com:7050"
+
+export CORE_PEER_LOCALMSPID="Org1MSP"
+export CHANNEL_NAME=workspace
 
 peer lifecycle chaincode install "$CHAINCODE_PATH"/assetTransfer.tar.gz
 
@@ -33,7 +31,3 @@ peer lifecycle chaincode checkcommitreadiness \
     --channelID "$CHANNEL_NAME" \
     -n "$CHAINCODE_NAME" \
     -v "$VERSION" --sequence "$SEQUENCE" --init-required
-
-# peer lifecycle chaincode commit -o ${ORDERER_ADDRESS} \
-#     --channelID ${CHANNEL_NAME} --name ${CHAINCODE_NAME} \
-#     --sequence ${VERSION} --version ${VERSION} --init-required

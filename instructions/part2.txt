@@ -34,7 +34,6 @@ peer channel create \
 docker exec -it cli bash -c ". scripts/createChannel.sh"
 
 
-====================== step 7 ======================
 
 
 
