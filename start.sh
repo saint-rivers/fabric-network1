@@ -25,6 +25,10 @@ export PATH=$PATH:$PWD/bin
 #       START NETWORK
 ########################################################################
 
+export COMPOSE_PROJECT_NAME=net
+export IMAGE_TAG=latest
+export SYS_CHANNEL=system-channel
+
 docker-compose -f docker/docker-compose.yaml up -d
 
 
@@ -57,3 +61,12 @@ docker exec -it cli bash -c ". scripts/installChaincodeOnPeer2.sh"
 ########################################################################
 
 docker exec -it cli bash -c ". scripts/commitChaincode.sh"
+
+
+########################################################################
+#       START HYPERLEDGER EXPLORER
+########################################################################
+
+docker-compose -f explorer/docker-compose.yaml up -d
+docker logs explorer.mynetwork.com 
+
