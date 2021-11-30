@@ -1,0 +1,20 @@
+OrdererOrgs:
+  - Name: OrdererOrg
+    Domain: workspace.com
+    EnableNodeOUs: true
+    Specs: 
+      - Hostname: orderer
+
+PeerOrgs:
+  - Name: Org1
+    Domain: org1.workspace.com
+    EnableNodeOUs: true
+    Template: 
+      Start: 1
+      Count: 2
+  - Name: Org2
+    Domain: org2.workspace.com
+    EnableNodeOUs: true
+    Template: 
+      Start: 1
+      Count: 2

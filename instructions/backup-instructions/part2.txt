@@ -1,0 +1,39 @@
+====================== step 5 ======================
+
+copy core.yaml
+
+copy orderer.yaml
+
+copy docker-compose-base.yaml
+
+
+====================== step 6 ======================
+
+export COMPOSE_PROJECT_NAME=net
+export IMAGE_TAG=latest
+export SYS_CHANNEL=system-channel
+
+docker-compose -f docker/docker-compose.yaml up -d
+docker ps
+
+====================== step 7 ======================
+
+### script
+
+export ORDERER_ADDRESS="orderer.workspace.com:7050"
+export CHANNEL_NAME=workspace
+
+peer channel create \
+    -o "$ORDERER_ADDRESS" \
+    -c "$CHANNEL_NAME" \
+    -f ./channel-artifacts/"$CHANNEL_NAME".tx \
+    --outputBlock ./"$CHANNEL_NAME".block
+
+### native
+
+docker exec -it cli bash -c ". scripts/createChannel.sh"
+
+
+
+
+

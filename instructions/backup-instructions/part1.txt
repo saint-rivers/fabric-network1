@@ -1,0 +1,226 @@
+====================== step 1.1 ======================
+
+OrdererOrgs:
+  - Name: OrdererOrg
+    Domain: workspace.com
+    EnableNodeOUs: true
+    Specs: 
+      - Hostname: orderer
+
+====================== step 1.2 ======================
+
+PeerOrgs:
+  - Name: Org1
+    Domain: org1.workspace.com
+    EnableNodeOUs: true
+    Template: 
+      Start: 1
+      Count: 2
+  - Name: Org2
+    Domain: org2.workspace.com
+    EnableNodeOUs: true
+    Template: 
+      Start: 1
+      Count: 2
+
+
+====================== step 2 ======================
+
+export FABRIC_CFG_PATH=$PWD/config
+export PATH=$PATH:$PWD/bin
+
+cryptogen generate --config=./config/crypto-config.yaml
+
+      
+====================== step 3: configtx.yaml ======================
+====================== step 3.1: template ======================
+
+Organizations:
+
+Capabilities:
+
+Application:
+
+Orderer:
+
+Channel:
+
+Profiles:
+
+
+====================== step 3.2: organizations ======================
+
+  - &OrdererOrg
+    Name: OrdererOrg
+    ID: OrdererMSP
+    SkipAsForeign: false
+    MSPDir: ../crypto-config/ordererOrganizations/workspace.com/orderers/orderer.workspace.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature 
+        Rule: "OR('OrdererMSP.admin')"
+      Endorsement: 
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+
+  - &Org1
+    Name: Org1MSP
+    ID: Org1MSP
+    MSPDir: ../crypto-config/peerOrganizations/org1.workspace.com/users/Admin@org1.workspace.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Org1MSP.member')"
+      Writers: 
+        Type: Signature
+        Rule: "OR('Org1MSP.member')"
+      Admins: 
+        Type: Signature
+        Rule: "OR('Org1MSP.member')"
+      Endorsement: 
+        Type: Signature
+        Rule: "OR('Org1MSP.member')"
+    AnchorPeers:
+      - Host: peer1.org1.workspace.com
+        Port: 7051
+
+  - &Org2
+    Name: Org2MSP
+    ID: Org2MSP
+    MSPDir: ../crypto-config/peerOrganizations/org2.workspace.com/users/Admin@org2.workspace.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Org2MSP.member')"
+      Writers: 
+        Type: Signature
+        Rule: "OR('Org2MSP.member')"
+      Admins: 
+        Type: Signature
+        Rule: "OR('Org2MSP.member')"
+      Endorsement: 
+        Type: Signature
+        Rule: "OR('Org2MSP.member')"
+    AnchorPeers:
+      - Host: peer1.org2.workspace.com
+        Port: 9051
+
+====================== step 3.3: Capabilities ======================
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+====================== step 3.4: Application ======================
+
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+====================== step 3.5: Orderer ======================
+
+Orderer: &OrdererDefaults
+  OrdererType: solo
+  Addresses:  
+    - orderer.workspace.com:7050
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+====================== step 3.6: Channel ======================
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+
+====================== step 3.7: Profiles ======================
+
+Profiles:
+  TwoOrgsChannel:
+    Consortium: SampleConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *Org1
+        - *Org2
+      Capabilities:
+        <<: *ApplicationCapabilities
+
+  TwoOrgsGenesis: 
+    Capabilities:
+      <<: *ChannelCapabilities
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+      Capabilities: 
+        <<: *OrdererCapabilities
+    Consortiums:
+      SampleConsortium:
+        Organizations:
+          - *Org1
+          - *Org2
+
+
+
+====================== step 4 ======================
+
+configtxgen -profile TwoOrgsGenesis -channelID system-channel -outputBlock ./channel-artifacts/genesis.block
+
+configtxgen -profile TwoOrgsChannel -channelID workspace -outputCreateChannelTx ./channel-artifacts/workspace.tx
+
+configtxgen -profile TwoOrgsChannel -channelID workspace -outputAnchorPeersUpdate ./channel-artifacts/Org1MSPanchor.tx -asOrg Org1MSP
+
+configtxgen -profile TwoOrgsChannel -channelID workspace -outputAnchorPeersUpdate ./channel-artifacts/Org2MSPanchor.tx -asOrg Org2MSP
+

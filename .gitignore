@@ -1,0 +1,6 @@
+/channel-artifacts
+/chaincode/vendor
+/chaincode/go.mod
+/chaincode/go.sum
+/chaincode/assetTransfer.tar.gz
+/crypto-config
