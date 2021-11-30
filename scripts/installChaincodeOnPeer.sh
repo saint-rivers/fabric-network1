@@ -22,7 +22,7 @@ peer lifecycle chaincode install "$CHAINCODE_PATH"/assetTransfer.tar.gz
 
 peer lifecycle chaincode queryinstalled >&log.txt
 cat log.txt
-PACKAGE_ID=$(sed -n "/\"$CHAINCODE_NAME\"_\"$SEQUENCE\"/{s/^Package ID: //; s/, Label:.*$//;p;}" log.txt)
+PACKAGE_ID=$(sed -n "/sacc_1/{s/^Package ID: //; s/, Label:.*$//;p;}" log.txt)
 
 peer lifecycle chaincode approveformyorg -o "$ORDERER_ADDRESS" \
     --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" \
