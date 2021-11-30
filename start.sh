@@ -68,6 +68,5 @@ docker exec -it cli bash -c ". scripts/commitChaincode.sh"
 #       START HYPERLEDGER EXPLORER
 ########################################################################
 
-# docker-compose -f explorer/docker-compose.yaml up -d
-# docker logs explorer.mynetwork.com 
+docker-compose -f explorer/docker-compose.yaml up -d
 
